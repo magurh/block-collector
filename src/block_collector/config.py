@@ -21,7 +21,7 @@ class NetworkConfig:
     wait_time: int
 
 
-flr_explorer_url = load_env_var("FLARE_EXPLORER_URL")
+flr_explorer_url = load_env_var("FLR_EXPLORER_URL")
 
 flr_config = NetworkConfig(
     network="flare",
@@ -29,7 +29,7 @@ flr_config = NetworkConfig(
     wait_time=70,
 )
 
-sgb_explorer_url = load_env_var("SONGBIRD_EXPLORER_URL")
+sgb_explorer_url = load_env_var("SGB_EXPLORER_URL")
 
 sgb_config = NetworkConfig(
     network="songbird",
