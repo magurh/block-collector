@@ -1,0 +1,7 @@
+[project]
+name = "block-collector"
+version = "0.1.0"
+description = "Block collection tool."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
