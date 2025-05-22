@@ -25,45 +25,32 @@ This tool can also be run on Google Cloud, with data being stored to GCP buckets
 
 ```bash
 gcloud storage buckets create gs://block-collector \
-    --project=flare-network-sandbox \
+    --project=PROJECT-ID \
     --location=europe-west2 \
     --uniform-bucket-level-access
 ```
 
-2. Build and push the repository to Artifacts Registry (AR):
+2. Spin up the VM:
 
 ```bash
-gcloud artifacts repositories create block-collector-repo \
-  --project=flare-network-sandbox \
-  --repository-format=docker \
-  --location=europe-west2 \
-  --description="Container images for block-collector"
-```
+gcloud compute instances create block-collector-vm \
+  --project=PROJECT-ID \
+  --zone=europe-west2-b \
+  --machine-type=e2-micro \
+  --boot-disk-size=20GB \
+  --image-family=debian-12 \
+  --image-project=debian-cloud \
+  --metadata startup-script='#! /bin/bash
+apt-get update
+apt-get install -y docker.io git
+systemctl enable docker && systemctl start docker
 
-3. Build and push directly to the AR repo:
-
-```bash
-gcloud builds submit \
-  --tag europe-west2-docker.pkg.dev/flare-network-sandbox/block-collector-repo/block-collector:latest \
-  .
-```
-
-4. Deploy and run (as a daemon):
-
-```bash
-gcloud run deploy block-collector \
-  --image=europe-west2-docker.pkg.dev/flare-network-sandbox/block-collector-repo/block-collector:latest \
-  --region=europe-west2 \
-  --platform=managed \
-  --allow-unauthenticated
-```
-
-5. Pin one instance (daemon mode) so your infinite loop stays alive:
-
-```bash
-gcloud run services update block-collector \
-  --region=europe-west2 \
-  --concurrency=1 \
-  --min-instances=1 \
-  --max-instances=1
+# clone/build/run
+git clone https://github.com/magurh/block-collector.git /opt/block-collector
+docker build -t block-collector:latest /opt/block-collector
+docker run -d \
+  --name block-collector \
+  --restart unless-stopped \
+  -e GCS_BUCKET_NAME=block-collector \
+  block-collector:latest'
 ```
