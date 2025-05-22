@@ -1,17 +1,16 @@
 import asyncio
-import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-import aiofiles
 import aiohttp
 import structlog
 from aiohttp import ClientSession
 from google.cloud import storage
 
 from block_collector.config import Config, flr_config, sgb_config
-from block_collector.gcp_storage import uploader_loop
+from block_collector.parser import append_blocks
 from block_collector.retriever import fetch_data
+from block_collector.gcp_storage import uploader_loop
 
 logger = structlog.get_logger(__name__)
 
@@ -26,23 +25,15 @@ UPLOAD_INTERVAL = 15 * 60  # seconds
 async def collector_loop(config: Config, session: ClientSession) -> None:
     """Continuously fetch and save blocks for a given network."""
     OUTPUT_DIR.mkdir(exist_ok=True)
-    filename = (
-        OUTPUT_DIR / f"{config.network}_blocks_{datetime.now(UTC):%Y%m%d}.json"
-    )
-
-    if filename.exists():
-        async with aiofiles.open(filename) as f:
-            all_data = json.loads(await f.read())
-    else:
-        all_data = []
+    csv_file = OUTPUT_DIR / f"{config.network}_blocks_{datetime.now(UTC):%Y%m%d}.csv"
+    max_height = -1
 
     while True:
         items = await fetch_data(session, config.explorer_url)
         if items:
-            all_data.extend(items)
-            async with aiofiles.open(filename, "w") as f:
-                await f.write(json.dumps(all_data))
-            logger.info("Saved new batch", network=config.network, count=len(items))
+            # append only the fields you care about
+            max_height = append_blocks(csv_file, items, max_height)
+            logger.info("Appended to CSV", network=config.network, count=len(items))
         await asyncio.sleep(config.wait_time)
 
 
