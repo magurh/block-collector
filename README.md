@@ -30,27 +30,27 @@ gcloud storage buckets create gs://block-collector \
     --uniform-bucket-level-access
 ```
 
-2. Spin up the VM:
+2. Source environment variables:
 
 ```bash
-gcloud compute instances create block-collector-vm \
-  --project=PROJECT-ID \
+source .env
+```
+
+3. Spin up the VM:
+
+```bash
+gcloud compute instances create-with-container "$INSTANCE_NAME" \
+  --project="$GCP_PROJECT_ID" \
   --zone=europe-west2-b \
   --machine-type=e2-micro \
   --boot-disk-size=20GB \
-  --image-family=debian-12 \
-  --image-project=debian-cloud \
-  --metadata startup-script='#! /bin/bash
-apt-get update
-apt-get install -y docker.io git
-systemctl enable docker && systemctl start docker
-
-# clone/build/run
-git clone https://github.com/magurh/block-collector.git /opt/block-collector
-docker build -t block-collector:latest /opt/block-collector
-docker run -d \
-  --name block-collector \
-  --restart unless-stopped \
-  -e GCS_BUCKET_NAME=block-collector \
-  block-collector:latest'
+  --image-family=cos-stable \
+  --image-project=cos-cloud \
+  --scopes=https://www.googleapis.com/auth/cloud-platform \
+  --container-image="$IMAGE_REFERENCE" \
+  --container-restart-policy=always \
+  --container-env=FLR_EXPLORER_URL="$FLR_EXPLORER_URL",\
+SGB_EXPLORER_URL="$SGB_EXPLORER_URL",\
+GCP_BUCKET_NAME="$GCP_BUCKET_NAME",\
+GCP_PROJECT_ID="$GCP_PROJECT_ID"
 ```
