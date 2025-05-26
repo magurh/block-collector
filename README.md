@@ -54,3 +54,12 @@ SGB_EXPLORER_URL="$SGB_EXPLORER_URL",\
 GCP_BUCKET_NAME="$GCP_BUCKET_NAME",\
 GCP_PROJECT_ID="$GCP_PROJECT_ID"
 ```
+
+## Analysis
+
+To analyze collected data in JupyterLab, configure the kernel:
+
+```bash
+uv run python -m ipykernel install --user --name=block-collector
+uv run jupyter lab
+```
