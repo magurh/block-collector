@@ -17,6 +17,13 @@ The data collection can be started using:
 uv run start-collection
 ```
 
+To analyze data using jupyter notebooks, install a kernel and run:
+
+```bash
+uv run python -m ipykernel install --user --name=block-collector
+uv run jupyter lab
+```
+
 ## GCP Setup
 
 This tool can also be run on Google Cloud, with data being stored to GCP buckets.
