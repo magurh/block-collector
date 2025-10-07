@@ -18,8 +18,10 @@ dependencies = [
     "pathlib>=1.0.1",
     "plotly>=6.1.1",
     "pyright>=1.1.401",
+    "rlp>=4.1.0",
     "ruff>=0.11.10",
     "structlog>=25.3.0",
+    "web3>=7.12.0",
 ]
 
 [project.scripts]
@@ -69,3 +71,6 @@ reportUnnecessaryTypeIgnoreComment = true
 reportMatchNotExhaustive = true
 reportImplicitOverride = true
 reportShadowedImports = true
+
+[[tool.uv.index]]
+url = "https://buf.build/gen/python"
